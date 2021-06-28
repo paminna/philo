@@ -49,7 +49,7 @@ void	ft_errors(char *str)
 	exit(0);
 }
 
-void	ft_parse(int argc, char **argv, t_input *args)
+void	ft_parse(int argc, char **argv, t_table *table)
 {
 	int i;
 	int j;
@@ -61,33 +61,48 @@ void	ft_parse(int argc, char **argv, t_input *args)
 	while (argv[i])
 	{
 		if (i == 1 && ft_isdigit(argv[i][j]))
-			args->num_of_philo = ft_atoi(argv[i]);
+			table->num_of_philo = ft_atoi(argv[i]);
 		else if (i == 2 && ft_isdigit(argv[i][j]))
-			args->time_to_die = ft_atoi(argv[i]);
+			table->time_to_die = ft_atoi(argv[i]);
 		else if (i == 3 && ft_isdigit(argv[i][j]))
-			args->time_to_eat = ft_atoi(argv[i]);
+			table->time_to_eat = ft_atoi(argv[i]);
 		else if (i == 4 && ft_isdigit(argv[i][j]))
-			args->time_to_sleep = ft_atoi(argv[i]);
+			table->time_to_sleep = ft_atoi(argv[i]);
 		else if (i == 5 && ft_isdigit(argv[i][j]))
-			args->num_of_each_eats = ft_atoi(argv[i]);
+			table->num_of_each_eats = ft_atoi(argv[i]);
 		else
 			ft_errors("wrong args");
 		i++;
 	}
-	// printf("num_of_philo |%d|\n",args->num_of_philo);
-	// printf("time_to_die |%d|\n",args->time_to_die);
-	// printf("time_to_eat |%d|\n",args->time_to_eat);
-	// printf("time_to_sleep |%d|\n",args->time_to_sleep);
 }
 
+void	*lifecycle(void *args)
+{}
+
+void	wait()
+{
+	struct timeval start;
+	gettimeofday(&start, NULL);
+}
 int	main(int argc, char **argv)
 {
-	t_input args;
-	t_philo philo;
+	t_table table;
+	// t_philo philo;
+	pthread_t *philo;
 
-	ft_parse(argc, argv, &args);
-	while (args.num_of_philo)
+	int			i;
+
+	ft_parse(argc, argv, &table);
+	table.forks = (int*)malloc(table.num_of_philo + 1);
+	if (table.forks == NULL)
+		ft_errors("malloc error");
+	philo = (pthread_t*)malloc(table.num_of_philo + 1);
+	if (table.forks == NULL)
+		ft_errors("malloc error");
+	while (i <= table.num_of_philo)
 	{
-		
+		pthread_create(&philo[i], NULL, lifecycle, NULL);
+		pthread_join(philo[i], NULL);
+		i++;
 	}
 }
