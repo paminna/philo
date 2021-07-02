@@ -19,6 +19,7 @@ typedef struct 	s_philo
 	t_table		*table;
 }				t_philo;
 
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>

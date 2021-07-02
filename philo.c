@@ -76,19 +76,34 @@ void	ft_parse(int argc, char **argv, t_table *table)
 	}
 }
 
-void	*lifecycle(void *args)
-{}
+// void	*lifecycle(void *args)
+// {}
 
-void	wait()
+int	get_time(struct timeval *cur)
+{
+	gettimeofday(cur, NULL);
+	return((int)((cur->tv_usec * 1000) - (cur->tv_sec / 1000)));
+}
+
+void	ft_wait(int time_to_wait)
 {
 	struct timeval start;
-	gettimeofday(&start, NULL);
+	int t_start, t_end;
+
+	t_start = 0;
+	t_end = t_start + time_to_wait;
+	while (t_start < t_end)
+	{
+		t_start = t_start + get_time(&start);
+	}
 }
+
 int	main(int argc, char **argv)
 {
 	t_table table;
 	// t_philo philo;
 	pthread_t *philo;
+	// struct timeval live_start;
 
 	int			i;
 
@@ -101,8 +116,9 @@ int	main(int argc, char **argv)
 		ft_errors("malloc error");
 	while (i <= table.num_of_philo)
 	{
-		pthread_create(&philo[i], NULL, lifecycle, NULL);
+		// pthread_create(&philo[i], NULL, lifecycle, NULL);
 		pthread_join(philo[i], NULL);
+		ft_wait(100);
 		i++;
 	}
 }
