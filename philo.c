@@ -1,52 +1,12 @@
 #include "philo.h"
 
-int				check_long(int sign)
+void	ft_init(t_table *table)
 {
-	if (sign == -1)
-		return (0);
-	return (-1);
-}
-
-int				ft_atoi(const char *str)
-{
-	int			i;
-	long long	res;
-	long long	tmp;
-	int			sign;
-
-	sign = 1;
-	i = 0;
-	res = 0;
-	while (str[i] == 32 || (str[i] > 8 && str[i] < 14))
-		i++;
-	if (str[i] == '-' || str[i] == '+')
-	{
-		if (str[i++] == '-')
-			sign = -1;
-	}
-	while (str[i] >= '0' && str[i] <= '9')
-	{
-		tmp = res;
-		res = res * 10 + str[i] - '0';
-		if (tmp > res && i != 0)
-			return (check_long(sign));
-		i++;
-	}
-	res = res * sign;
-	return ((int)res);
-}
-
-int	ft_isdigit(int c)
-{
-	if ((c >= '0' && c <= '9') || (c == ' '))
-		return (1);
-	return (0);
-}
-
-void	ft_errors(char *str)
-{
-	printf("%s\n", str);
-	exit(0);
+	table->num_of_philo = 0;
+	table->num_of_each_eats = 0;
+	table->time_to_eat = 0;
+	table->time_to_sleep = 0;
+	table->time_to_die = 0;
 }
 
 void	ft_parse(int argc, char **argv, t_table *table)
@@ -76,8 +36,6 @@ void	ft_parse(int argc, char **argv, t_table *table)
 	}
 }
 
-// void	*lifecycle(void *args)
-// {}
 
 int	get_time(struct timeval *cur)
 {
@@ -88,37 +46,76 @@ int	get_time(struct timeval *cur)
 void	ft_wait(int time_to_wait)
 {
 	struct timeval start;
-	int t_start, t_end;
+	int t_start;
+	int t_end;
 
 	t_start = 0;
 	t_end = t_start + time_to_wait;
 	while (t_start < t_end)
-	{
 		t_start = t_start + get_time(&start);
+}
+
+void	ft_eat(t_philo *philo)
+{
+
+}
+
+void	*lifecycle(void *ph)
+{
+	int i;
+	t_philo *philo;
+
+	philo = (t_philo*)ph;
+	ft_eat(philo);
+	// ft_wait();
+	return NULL;
+}
+void	ft_init_philo(t_philo *philo)
+{
+	int i;
+
+	i = 0;
+	pthread_mutex_init(philo->table->forks, NULL);
+	philo->table->forks = (pthread_mutex_t*)malloc(philo->table->num_of_philo + 1);
+	if (philo->table->forks == NULL)
+		ft_errors("malloc error");
+	while (i != philo->table->num_of_philo)
+		pthread_mutex_init(&philo->table->forks[i++], NULL);
+	while (i != philo->table->num_of_philo)
+	{
+		philo[i].my_num = i;
+		philo[i].eat = philo->table->time_to_eat;
+
+		philo[i].left_fork = &philo[i].left_fork[i];
+		if (i == philo->table->num_of_philo)
+			i = 0;
+		philo[i].right_fork = &philo[i].right_fork[i + 1];
+		i++;
+	}
+}
+
+void	ft_start_philo()
+{
+	int 		i;
+	t_table 	table;
+	t_philo		philo[table.num_of_philo];
+	pthread_t	t_philo[table.num_of_philo];
+
+	i = 0;
+	ft_init_philo(philo);
+	while (i <= table.num_of_philo)
+	{
+		pthread_create(&t_philo[i], NULL, lifecycle, &philo[i]);
+		pthread_join(t_philo[i], NULL);
+		i++;
 	}
 }
 
 int	main(int argc, char **argv)
 {
-	t_table table;
-	// t_philo philo;
-	pthread_t *philo;
-	// struct timeval live_start;
-
+	t_table		table;
 	int			i;
 
 	ft_parse(argc, argv, &table);
-	table.forks = (int*)malloc(table.num_of_philo + 1);
-	if (table.forks == NULL)
-		ft_errors("malloc error");
-	philo = (pthread_t*)malloc(table.num_of_philo + 1);
-	if (table.forks == NULL)
-		ft_errors("malloc error");
-	while (i <= table.num_of_philo)
-	{
-		// pthread_create(&philo[i], NULL, lifecycle, NULL);
-		pthread_join(philo[i], NULL);
-		ft_wait(100);
-		i++;
-	}
+	ft_start_philo();
 }
