@@ -7,8 +7,46 @@ void	ft_init(t_table *table)
 	table->time_to_eat = 0;
 	table->time_to_sleep = 0;
 	table->time_to_die = 0;
+	table->all_time = 0;
 }
 
+void	print_table(t_table *table)
+{
+	int i = 0;
+
+	while (i < table->num_of_philo)
+	{
+		printf("[%p] ", &table->forks[i]);
+		i++;
+	}
+	printf("\n");
+}
+
+void	print_philo(t_philo *philo)
+{
+	printf("%d fork L = [%p] ", philo->my_num, philo->left_fork);
+	printf("fork R = [%p]\n", philo->right_fork);
+}
+
+void	give_forks(t_table *table, t_philo *philo)
+{
+	int i;
+
+	i = 0;
+	table->forks = (pthread_mutex_t*)malloc(table->num_of_philo * sizeof(pthread_mutex_t));
+	if (table->forks == NULL)
+		ft_errors("malloc error");
+	// print_table(table);
+	while (i < table->num_of_philo)
+	{
+		philo[i].right_fork = &table->forks[i];
+		if (i == 0)
+			philo[i].left_fork = &table->forks[table->num_of_philo - 1];
+		philo[i].left_fork = &table->forks[i - 1];
+		// print_philo(&philo[i]);
+		i++;
+	}
+}
 void	ft_parse(int argc, char **argv, t_table *table)
 {
 	int i;
@@ -65,45 +103,50 @@ void	*lifecycle(void *ph)
 	int i;
 	t_philo *philo;
 
-	philo = (t_philo*)ph;
+	philo = ph;
 	ft_eat(philo);
-	// ft_wait();
 	return NULL;
 }
-void	ft_init_philo(t_philo *philo)
+void	ft_init_philo(t_philo *philo, t_table *table)
 {
 	int i;
+	int j;
 
+	j = 0;
 	i = 0;
-	pthread_mutex_init(philo->table->forks, NULL);
-	philo->table->forks = (pthread_mutex_t*)malloc(philo->table->num_of_philo + 1);
-	if (philo->table->forks == NULL)
-		ft_errors("malloc error");
-	while (i != philo->table->num_of_philo)
-		pthread_mutex_init(&philo->table->forks[i++], NULL);
-	while (i != philo->table->num_of_philo)
+	give_forks(table, philo);
+	while (i != table->num_of_philo)
 	{
-		philo[i].my_num = i;
-		philo[i].eat = philo->table->time_to_eat;
-
-		philo[i].left_fork = &philo[i].left_fork[i];
-		if (i == philo->table->num_of_philo)
-			i = 0;
-		philo[i].right_fork = &philo[i].right_fork[i + 1];
+		pthread_mutex_init(&(table->forks[i]), NULL);
 		i++;
 	}
+	i = 0;
+	while (i != table->num_of_philo)
+	{
+		philo[i].my_num = i;
+		philo[i].eat = table->time_to_eat;
+		philo[i].left_fork = &philo[i].left_fork[j];
+		if (j == table->num_of_philo)
+			j = -1;
+		philo[i].right_fork = &philo[i].right_fork[j + 1];
+		i++;
+		j++;
+	}
+	// i = 0;
+	// while (i < table->num_of_philo)
+	// 	print_philo(&philo[i++]);
 }
 
-void	ft_start_philo()
+void	ft_start_philo(t_table 	*table)
 {
 	int 		i;
-	t_table 	table;
-	t_philo		philo[table.num_of_philo];
-	pthread_t	t_philo[table.num_of_philo];
+	t_philo		philo[table->num_of_philo];
+	pthread_t	t_philo[table->num_of_philo];
 
 	i = 0;
-	ft_init_philo(philo);
-	while (i <= table.num_of_philo)
+	ft_init_philo(philo, table);
+	printf("num of philo %d\n", table->num_of_philo);
+	while (i <= table->num_of_philo)
 	{
 		pthread_create(&t_philo[i], NULL, lifecycle, &philo[i]);
 		pthread_join(t_philo[i], NULL);
@@ -114,8 +157,7 @@ void	ft_start_philo()
 int	main(int argc, char **argv)
 {
 	t_table		table;
-	int			i;
 
 	ft_parse(argc, argv, &table);
-	ft_start_philo();
+	ft_start_philo(&table);
 }
