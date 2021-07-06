@@ -115,7 +115,7 @@ long	get_time(void)
 
 void	ft_wait(int time_to_wait)
 {
-	long t_start;
+	time_t t_start;
 	long t_end;
 
 	// usleep(time_to_wait * 1000);
@@ -123,7 +123,7 @@ void	ft_wait(int time_to_wait)
 	t_end = t_start + time_to_wait;
 	while (t_start < t_end)
 	{
-		t_start += get_time() - t_start;
+		t_start = get_time();
 		usleep(10);
 	}
 }
@@ -151,27 +151,15 @@ void	ft_eat(t_philo *philo)
 	if (philo->my_num % 2)
 	{
 		pthread_mutex_lock(philo->left_fork);
-		// pthread_mutex_lock(&philo->table->print);
-		// printf("%ld %d philo has taken fork\n", get_time() - philo->table->birth, philo->my_num);
-		// pthread_mutex_unlock(&philo->table->print);
 		print_message("has taken a fork", get_time() - philo->table->birth, philo->my_num, philo);
 		pthread_mutex_lock(philo->right_fork);
-		// pthread_mutex_lock(&philo->table->print);
-		// printf("%ld %d philo has taken fork\n", get_time() - philo->table->birth, philo->my_num);
-		// pthread_mutex_unlock(&philo->table->print);
 		print_message("has taken a fork", get_time() - philo->table->birth, philo->my_num, philo);
 	}
 	else
 	{
 		pthread_mutex_lock(philo->right_fork);
-		// pthread_mutex_lock(&philo->table->print);
-		// printf("%ld %d philo has taken fork\n", get_time() - philo->table->birth, philo->my_num);
-		// pthread_mutex_unlock(&philo->table->print);
 		print_message("has taken a fork", get_time() - philo->table->birth, philo->my_num, philo);
 		pthread_mutex_lock(philo->left_fork);
-		// pthread_mutex_lock(&philo->table->print);
-		// printf("%ld %d philo has taken fork\n", get_time() - philo->table->birth, philo->my_num);
-		// pthread_mutex_unlock(&philo->table->print);
 		print_message("has taken a fork", get_time() - philo->table->birth, philo->my_num, philo);
 
 	}
@@ -185,27 +173,15 @@ void	ft_eat(t_philo *philo)
 	if (philo->my_num % 2)
 	{
 		pthread_mutex_unlock(philo->left_fork);
-		// pthread_mutex_lock(&philo->table->print);
-		// printf("%ld %d philo put fork\n", get_time() - philo->table->birth, philo->my_num);
-		// pthread_mutex_unlock(&philo->table->print);
 		print_message("put fork", get_time() - philo->table->birth, philo->my_num, philo);
 		pthread_mutex_unlock(philo->right_fork);
-		// pthread_mutex_lock(&philo->table->print);
-		// printf("%ld %d philo put fork\n", get_time() - philo->table->birth, philo->my_num);
-		// pthread_mutex_unlock(&philo->table->print);
 		print_message("put fork", get_time() - philo->table->birth, philo->my_num, philo);
 	}
 	else
 	{
 		pthread_mutex_unlock(philo->right_fork);
-		// pthread_mutex_lock(&philo->table->print);
-		// printf("%ld %d philo put fork\n", get_time() - philo->table->birth, philo->my_num);
-		// pthread_mutex_unlock(&philo->table->print);
 		print_message("put fork", get_time() - philo->table->birth, philo->my_num, philo);
 		pthread_mutex_unlock(philo->left_fork);
-		// pthread_mutex_lock(&philo->table->print);
-		// printf("%ld %d philo put fork\n", get_time() - philo->table->birth, philo->my_num);
-		// pthread_mutex_unlock(&philo->table->print);
 		print_message("put fork", get_time() - philo->table->birth, philo->my_num, philo);
 	}
 }
@@ -217,7 +193,7 @@ void	*check_death(void *ph)
 	philo = ph;
 	while (1)
 	{
-		pthread_mutex_lock(&philo->table->time);
+		// pthread_mutex_lock(&philo->table->time);
 		if (get_time() - philo->last_lunch > philo->table->time_to_die)
 		{
 			philo->is_dead = 1;
@@ -269,13 +245,13 @@ void	ft_init_philo(t_philo *philo, t_table *table)
 		philo[i].my_num = i;
 		philo[i].is_dead = 0;
 		philo[i].eat = table->time_to_eat;
-		philo[i].left_fork = &philo[i].left_fork[j];
+		// philo[i].left_fork = &philo[i].left_fork[j];
 		philo[i].table = table;
-		if (j == table->num_of_philo)
-			j = -1;
-		philo[i].right_fork = &philo[i].right_fork[j + 1];
+		// if (j == table->num_of_philo)
+			// j = -1;
+		// philo[i].right_fork = &philo[i].right_fork[j + 1];
 		i++;
-		j++;
+		// j++;
 	}
 }
 
