@@ -1,54 +1,10 @@
 #include "philo.h"
 
-size_t	ft_strlen(const char *s)
-{
-	size_t	i;
-
-	i = 0;
-	while (s[i] != '\0')
-		i++;
-	return (i);
-}
-
-void	ft_init(t_table *table)
-{
-	table->num_of_philo = 0;
-	table->num_of_each_eats = 0;
-	table->time_to_eat = 0;
-	table->time_to_sleep = 0;
-	table->time_to_die = 0;
-	table->is_dead = 0;
-	pthread_mutex_init(&table->time, NULL);
-	pthread_mutex_init(&table->death, NULL);
-	pthread_mutex_init(&table->print, NULL);
-}
-
-void	give_forks(t_table *table, t_philo *philo)
-{
-	int i;
-
-	i = 0;
-	table->forks = (pthread_mutex_t*)malloc(table->num_of_philo * sizeof(pthread_mutex_t));
-	if (table->forks == NULL)
-		ft_errors("malloc error");
-	while (i < table->num_of_philo)
-	{
-		philo[i].right_fork = &table->forks[i];
-		if (i == 0)
-			philo[i].left_fork = &table->forks[table->num_of_philo - 1];
-		else
-			philo[i].left_fork = &table->forks[i - 1];
-		i++;
-	}
-}
-
 void	ft_parse(int argc, char **argv, t_table *table)
 {
-	int i;
-	int j;
+	int	i;
 
 	i = 1;
-	j = 0;
 	ft_init(table);
 	if (argc < 5 || argc > 6)
 		ft_errors("wrong amount of arguments");
@@ -72,7 +28,7 @@ void	ft_parse(int argc, char **argv, t_table *table)
 
 void	clear(t_table *table)
 {
-	int i;
+	int	i;
 
 	i = 0;
 	pthread_mutex_destroy(&table->print);
@@ -88,24 +44,10 @@ void	clear(t_table *table)
 
 long	get_time(void)
 {
-	struct timeval cur;
+	struct timeval	cur;
 
 	gettimeofday(&cur, NULL);
-	return((long)((cur.tv_sec * 1000) + (cur.tv_usec / 1000)));
-}
-
-void	ft_wait(int time_to_wait)
-{
-	time_t t_start;
-	long t_end;
-
-	t_start = get_time();
-	t_end = t_start + time_to_wait;
-	while (t_start < t_end)
-	{
-		t_start = get_time();
-		usleep(10);
-	}
+	return ((long)((cur.tv_sec * 1000) + (cur.tv_usec / 1000)));
 }
 
 void	print_message(char *str, long time, int num, t_philo *philo)
@@ -116,133 +58,23 @@ void	print_message(char *str, long time, int num, t_philo *philo)
 	pthread_mutex_unlock(&philo->table->print);
 }
 
-void	ft_sleep(t_philo *philo)
-{
-	print_message("is sleeping", philo->table->birth, philo->my_num, philo);
-	ft_wait(philo->table->time_to_sleep);
-}
-
-void	ft_eat(t_philo *philo)
-{
-	if (philo->my_num % 2)
-	{
-		pthread_mutex_lock(philo->left_fork);
-		print_message("has taken L fork", philo->table->birth, philo->my_num, philo);
-		pthread_mutex_lock(philo->right_fork);
-		print_message("has taken R fork", philo->table->birth, philo->my_num, philo);
-	}
-	else
-	{
-		pthread_mutex_lock(philo->right_fork);
-		print_message("has taken R fork", philo->table->birth, philo->my_num, philo);
-		pthread_mutex_lock(philo->left_fork);
-		print_message("has taken L fork", philo->table->birth, philo->my_num, philo);
-
-	}
-	print_message("is eating", philo->table->birth, philo->my_num, philo);
-	pthread_mutex_lock(&philo->table->time);
-	philo->last_lunch = get_time();
-	pthread_mutex_unlock(&philo->table->time);
-	ft_wait(philo->table->time_to_eat);
-	pthread_mutex_unlock(philo->right_fork);
-	pthread_mutex_unlock(philo->left_fork);
-}
-
 void	*check_death(void *ph)
 {
-	t_philo *philo;
+	t_philo	*philo;
 
 	philo = ph;
 	while (1)
 	{
 		pthread_mutex_lock(&philo->table->death);
 		if (get_time() - philo->last_lunch > philo->table->time_to_die)
-			break;
+			break ;
 		pthread_mutex_unlock(&philo->table->death);
 	}
-	print_message("died", philo->table->birth, philo->my_num, philo);
+	if (philo->count_eat != 0)
+		print_message("died", philo->table->birth, philo->my_num, philo);
+	else
+		print_message("all feeded", philo->table->birth, philo->my_num, philo);
 	*philo->is_dead = 1;
 	pthread_mutex_unlock(&philo->table->death);
-	return(NULL);
-}
-
-void	ft_think(t_philo *philo)
-{
-	print_message("is thinking", philo->table->birth, philo->my_num, philo);
-}
-
-void	*lifecycle(void *ph)
-{
-	int i;
-	t_philo *philo;
-	pthread_t	death;
-
-	philo = ph;
-	philo->last_lunch = get_time();
-	philo->table->birth = get_time();
-	pthread_create(&death, NULL, check_death, philo);
-	while (!philo->table->is_dead)
-	{
-		ft_eat(philo);
-		ft_sleep(philo);
-		ft_think(philo);
-	}
-	pthread_join(death, NULL);
-	return NULL;
-}
-
-void	ft_init_philo(t_philo *philo, t_table *table)
-{
-	int i;
-	int j;
-
-	j = 0;
-	i = 0;
-	give_forks(table, philo);
-	while (i != table->num_of_philo)
-	{
-		pthread_mutex_init(&(table->forks[i]), NULL);
-		i++;
-	}
-	i = 0;
-	while (i != table->num_of_philo)
-	{
-		philo[i].my_num = i;
-		philo[i].is_dead = 0;
-		philo[i].eat = table->time_to_eat;
-		philo[i].table = table;
-		philo[i].is_dead = &table->is_dead;
-		i++;
-	}
-}
-
-void	ft_start_philo(t_table 	*table)
-{
-	int 		i;
-	t_philo		philo[table->num_of_philo];
-	pthread_t	t_philo[table->num_of_philo];
-
-	i = 0;
-	ft_init_philo(philo, table);
-	while (i < table->num_of_philo)
-	{
-		pthread_create(&t_philo[i], NULL, lifecycle, &philo[i]);
-		i++;
-	}
-	i = 0;
-	while (i < table->num_of_philo)
-	{
-		pthread_join(t_philo[i], NULL);
-		i++;
-	}
-	clear(table);
-}
-
-int	main(int argc, char **argv)
-{
-	t_table		table;
-	
-	ft_parse(argc, argv, &table);
-	ft_start_philo(&table);
-	return (0);
+	return (NULL);
 }

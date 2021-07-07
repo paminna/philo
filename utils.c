@@ -48,3 +48,16 @@ void	ft_errors(char *str)
 	printf("%s\n", str);
 	exit(0);
 }
+
+void	ft_init(t_table *table)
+{
+	table->num_of_philo = 0;
+	table->num_of_each_eats = -1;
+	table->time_to_eat = 0;
+	table->time_to_sleep = 0;
+	table->time_to_die = 0;
+	table->is_dead = 0;
+	pthread_mutex_init(&table->time, NULL);
+	pthread_mutex_init(&table->death, NULL);
+	pthread_mutex_init(&table->print, NULL);
+}
