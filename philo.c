@@ -23,24 +23,6 @@ void	ft_init(t_table *table)
 	pthread_mutex_init(&table->print, NULL);
 }
 
-// void	print_table(t_table *table)
-// {
-// 	int i = 0;
-
-// 	while (i < table->num_of_philo)
-// 	{
-// 		printf("[%p] ", &table->forks[i]);
-// 		i++;
-// 	}
-// 	printf("\n");
-// }
-
-// void	print_philo(t_philo *philo)
-// {
-// 	printf("%d fork L = [%p] ", philo->my_num, philo->left_fork);
-// 	printf("fork R = [%p]\n", philo->right_fork);
-// }
-
 void	give_forks(t_table *table, t_philo *philo)
 {
 	int i;
@@ -51,8 +33,11 @@ void	give_forks(t_table *table, t_philo *philo)
 		ft_errors("malloc error");
 	while (i < table->num_of_philo)
 	{
-		philo[i].right_fork = &table->forks[(i + 1) % table->num_of_philo];
-		philo[i].left_fork = &table->forks[(i - 1 + table->num_of_philo) % table->num_of_philo];
+		philo[i].right_fork = &table->forks[i];
+		if (i == 0)
+			philo[i].left_fork = &table->forks[table->num_of_philo - 1];
+		else
+			philo[i].left_fork = &table->forks[i - 1];
 		i++;
 	}
 }
@@ -134,33 +119,31 @@ void	print_message(char *str, long time, int num, t_philo *philo)
 void	ft_sleep(t_philo *philo)
 {
 	print_message("is sleeping", philo->table->birth, philo->my_num, philo);
-	pthread_mutex_lock(&philo->table->time);
 	ft_wait(philo->table->time_to_sleep);
-	pthread_mutex_unlock(&philo->table->time);
 }
 
 void	ft_eat(t_philo *philo)
 {
-	if (philo->my_num % 2 == 0)
+	if (philo->my_num % 2)
 	{
 		pthread_mutex_lock(philo->left_fork);
-		print_message("has taken a fork", philo->table->birth, philo->my_num, philo);
+		print_message("has taken L fork", philo->table->birth, philo->my_num, philo);
 		pthread_mutex_lock(philo->right_fork);
-		print_message("has taken a fork", philo->table->birth, philo->my_num, philo);
+		print_message("has taken R fork", philo->table->birth, philo->my_num, philo);
 	}
 	else
 	{
 		pthread_mutex_lock(philo->right_fork);
-		print_message("has taken a fork", philo->table->birth, philo->my_num, philo);
+		print_message("has taken R fork", philo->table->birth, philo->my_num, philo);
 		pthread_mutex_lock(philo->left_fork);
-		print_message("has taken a fork", philo->table->birth, philo->my_num, philo);
+		print_message("has taken L fork", philo->table->birth, philo->my_num, philo);
 
 	}
 	print_message("is eating", philo->table->birth, philo->my_num, philo);
 	pthread_mutex_lock(&philo->table->time);
 	philo->last_lunch = get_time();
-	ft_wait(philo->table->time_to_eat);
 	pthread_mutex_unlock(&philo->table->time);
+	ft_wait(philo->table->time_to_eat);
 	pthread_mutex_unlock(philo->right_fork);
 	pthread_mutex_unlock(philo->left_fork);
 }
