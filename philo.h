@@ -14,7 +14,7 @@ typedef	struct 			s_table
 	long				time_to_eat;
 	int					time_to_sleep;
 	int					num_of_each_eats;
-	// int					all_time;
+	int					is_dead;
 	long				birth;
 	pthread_mutex_t		time;
 	pthread_mutex_t		death;
@@ -30,7 +30,7 @@ typedef struct 			s_philo
 	int					my_num;
 	int					eat;
 	long				last_lunch;
-	int					is_dead;
+	int					*is_dead;
 	t_table				*table;
 }						t_philo;
 
