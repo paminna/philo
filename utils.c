@@ -1,13 +1,13 @@
 #include "philo.h"
 
-int				check_long(int sign)
+int	check_long(int sign)
 {
 	if (sign == -1)
 		return (0);
 	return (-1);
 }
 
-int				ft_atoi(const char *str)
+int	ft_atoi(const char *str)
 {
 	int			i;
 	long long	res;

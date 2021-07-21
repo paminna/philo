@@ -10,7 +10,7 @@ void	ft_parse(int argc, char **argv, t_table *table)
 		ft_errors("wrong amount of arguments");
 	while (argv[i])
 	{
-		if (i == 1 && ft_atoi(argv[i]) > 2)
+		if (i == 1 && ft_atoi(argv[i]) >= 2)
 			table->num_of_philo = ft_atoi(argv[i]);
 		else if (i == 2 && ft_atoi(argv[i]) > 0)
 			table->time_to_die = ft_atoi(argv[i]);

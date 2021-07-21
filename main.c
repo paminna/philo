@@ -49,23 +49,27 @@ void	ft_init_philo(t_philo *philo, t_table *table)
 void	ft_start_philo(t_table 	*table)
 {
 	int			i;
-	t_philo		philo[table->num_of_philo];
-	pthread_t	t_philo[table->num_of_philo];
+	t_philo		*philo;
+	pthread_t	*th_philo;
 
 	i = 0;
+	th_philo = (pthread_t *)malloc(sizeof(pthread_t) * (table->num_of_philo));
+	philo = (malloc(sizeof(t_philo) * table->num_of_philo));
 	ft_init_philo(philo, table);
 	while (i < table->num_of_philo)
 	{
-		pthread_create(&t_philo[i], NULL, lifecycle, &philo[i]);
+		pthread_create(&th_philo[i], NULL, lifecycle, &philo[i]);
 		i++;
 	}
 	i = 0;
 	while (i < table->num_of_philo)
 	{
-		pthread_join(t_philo[i], NULL);
+		pthread_join(th_philo[i], NULL);
 		i++;
 	}
 	clear(table);
+	free (philo);
+	free(th_philo);
 }
 
 int	main(int argc, char **argv)

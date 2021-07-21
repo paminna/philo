@@ -53,7 +53,6 @@ void	ft_think(t_philo *philo)
 
 void	*lifecycle(void *ph)
 {
-	int			i;
 	t_philo		*philo;
 	pthread_t	death;
 
